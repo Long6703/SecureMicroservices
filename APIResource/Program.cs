@@ -8,8 +8,27 @@ namespace APIResource
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
+
             builder.Services.AddDbContext<APIResourceContext>(options =>
                 options.UseInMemoryDatabase("MoviesDatabase"));
+
+            builder.Services.AddAuthentication("Bearer")
+                .AddJwtBearer("Bearer", options =>
+                {
+                    options.Authority = "https://localhost:5005";
+                    options.TokenValidationParameters = new Microsoft.IdentityModel.Tokens.TokenValidationParameters
+                    {
+                        ValidateAudience = false
+                    };
+                });
+
+            builder.Services.AddAuthorization(options =>
+            {
+                options.AddPolicy("ClientIdPolicy", policy =>
+                {
+                    policy.RequireClaim("client_id", "movieClient");
+                });
+            });
 
             // Add services to the container.
 
@@ -28,7 +47,8 @@ namespace APIResource
             }
 
             app.UseHttpsRedirection();
-
+            app.UseRouting();
+            app.UseAuthentication();
             app.UseAuthorization();
 
 

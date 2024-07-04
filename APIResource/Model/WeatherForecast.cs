@@ -1,4 +1,4 @@
-namespace APIResource
+namespace APIResource.Model
 {
     public class WeatherForecast
     {
