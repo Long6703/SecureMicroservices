@@ -1,6 +1,6 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿
 using Microsoft.Extensions.DependencyInjection;
-using Client.Data;
+using Client.APIServices;
 namespace Client
 {
     public class Program
@@ -8,10 +8,10 @@ namespace Client
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
-            builder.Services.AddDbContext<ClientContext>(options =>
-                options.UseSqlServer(builder.Configuration.GetConnectionString("ClientContext") ?? throw new InvalidOperationException("Connection string 'ClientContext' not found.")));
 
             // Add services to the container.
+            builder.Services.AddScoped<IMoviesAPIService, MovieAPIServiceImplement>();
+
             builder.Services.AddControllersWithViews();
 
             var app = builder.Build();
