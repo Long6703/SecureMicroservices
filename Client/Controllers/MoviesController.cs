@@ -6,9 +6,16 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Client.Model;
 using Client.APIServices;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.IdentityModel.Protocols.OpenIdConnect;
+using Microsoft.AspNetCore.Authentication;
+using System.Diagnostics;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 
 namespace Client.Controllers
 {
+    [Authorize]
     public class MoviesController : Controller
     {
         private readonly IMoviesAPIService _moviesAPIService;
@@ -21,6 +28,7 @@ namespace Client.Controllers
         // GET: Movies
         public async Task<IActionResult> Index()
         {
+            await LogTokenAndClaims();
             return View(await _moviesAPIService.GetMovies());
         }
 
@@ -28,6 +36,7 @@ namespace Client.Controllers
         public async Task<IActionResult> Details(int? id)
         {
             //if (id == null || _context.Movies == null)
+
             //{
             //    return NotFound();
             //}
@@ -154,10 +163,28 @@ namespace Client.Controllers
             return View();
         }
 
+        public async Task Logout()
+        {
+            await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+            await HttpContext.SignOutAsync(OpenIdConnectDefaults.AuthenticationScheme);
+        }
+
         private bool MoviesExists(int id)
         {
             //return (_context.Movies?.Any(e => e.Id == id)).GetValueOrDefault();
             return true;
+        }
+
+        public async Task LogTokenAndClaims()
+        {
+            var identityToken = await HttpContext.GetTokenAsync(OpenIdConnectParameterNames.IdToken);
+
+            Debug.WriteLine($"Identity token: {identityToken}");
+
+            foreach (var claim in User.Claims)
+            {
+                Debug.WriteLine($"Claim type: {claim.Type} - Claim value: {claim.Value}");
+            }
         }
     }
 }

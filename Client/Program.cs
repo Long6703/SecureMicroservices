@@ -1,6 +1,11 @@
 ﻿
 using Microsoft.Extensions.DependencyInjection;
 using Client.APIServices;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication.OpenIdConnect;
+using Client.HttpHandler;
+using Microsoft.Net.Http.Headers;
+using IdentityModel.Client;
 namespace Client
 {
     public class Program
@@ -13,6 +18,49 @@ namespace Client
             builder.Services.AddScoped<IMoviesAPIService, MovieAPIServiceImplement>();
 
             builder.Services.AddControllersWithViews();
+
+            builder.Services.AddAuthentication(options =>
+            {
+                options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+                options.DefaultChallengeScheme = OpenIdConnectDefaults.AuthenticationScheme;
+            }).AddCookie(CookieAuthenticationDefaults.AuthenticationScheme)
+            .AddOpenIdConnect(OpenIdConnectDefaults.AuthenticationScheme, options =>
+            {
+                options.Authority = "https://localhost:5005";
+                options.ClientId = "movies_mvc_client";
+                options.ClientSecret = "secret";
+                options.ResponseType = "code";
+                options.Scope.Add("openid");
+                options.Scope.Add("profile");
+                options.SaveTokens = true;
+                options.GetClaimsFromUserInfoEndpoint = true;
+            });
+
+            builder.Services.AddTransient<AuthenticationDelegatingHandler>();
+
+            builder.Services.AddHttpClient("APIResourceClient", client =>
+            {
+                client.BaseAddress = new Uri("https://localhost:5001");
+                client.DefaultRequestHeaders.Clear();
+                client.DefaultRequestHeaders.Add(HeaderNames.Accept, "application/json");
+
+            }).AddHttpMessageHandler<AuthenticationDelegatingHandler>();
+
+            builder.Services.AddHttpClient("IdentityServerClient", client =>
+            {
+                client.BaseAddress = new Uri("https://localhost:5005");
+                client.DefaultRequestHeaders.Clear();
+                client.DefaultRequestHeaders.Add(HeaderNames.Accept, "application/json");
+
+            });
+
+            builder.Services.AddSingleton(new ClientCredentialsTokenRequest
+            {
+                Address = "https://localhost:5005/connect/token",
+                ClientId = "movieClient",
+                ClientSecret = "secret",
+                Scope = "movieAPI"
+            });
 
             var app = builder.Build();
 
@@ -29,6 +77,7 @@ namespace Client
 
             app.UseRouting();
 
+            app.UseAuthentication();
             app.UseAuthorization();
 
             app.MapControllerRoute(
