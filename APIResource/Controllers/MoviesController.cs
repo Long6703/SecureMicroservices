@@ -13,7 +13,7 @@ namespace APIResource.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize("ClientIdPolicy")]
+    [Authorize]
     public class MoviesController : ControllerBase
     {
         private readonly APIResourceContext _context;
@@ -121,6 +121,6 @@ namespace APIResource.Controllers
         private bool MoviesExists(int id)
         {
             return (_context.Movies?.Any(e => e.Id == id)).GetValueOrDefault();
-        }
+        }   
     }
 }

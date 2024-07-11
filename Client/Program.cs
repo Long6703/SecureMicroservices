@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Client.HttpHandler;
 using Microsoft.Net.Http.Headers;
 using IdentityModel.Client;
+using IdentityModel;
 namespace Client
 {
     public class Program
@@ -29,11 +30,22 @@ namespace Client
                 options.Authority = "https://localhost:5005";
                 options.ClientId = "movies_mvc_client";
                 options.ClientSecret = "secret";
-                options.ResponseType = "code";
-                options.Scope.Add("openid");
-                options.Scope.Add("profile");
+                options.ResponseType = "code id_token";
+                //options.Scope.Add("openid");
+                //options.Scope.Add("profile");
+                options.Scope.Add("address");
+                options.Scope.Add("email");
+                options.Scope.Add("movieAPI");
+                options.Scope.Add("roles");
+
                 options.SaveTokens = true;
                 options.GetClaimsFromUserInfoEndpoint = true;
+
+                options.TokenValidationParameters = new Microsoft.IdentityModel.Tokens.TokenValidationParameters
+                {
+                    NameClaimType = JwtClaimTypes.GivenName,
+                    RoleClaimType = JwtClaimTypes.Role
+                };
             });
 
             builder.Services.AddTransient<AuthenticationDelegatingHandler>();
@@ -54,13 +66,15 @@ namespace Client
 
             });
 
-            builder.Services.AddSingleton(new ClientCredentialsTokenRequest
-            {
-                Address = "https://localhost:5005/connect/token",
-                ClientId = "movieClient",
-                ClientSecret = "secret",
-                Scope = "movieAPI"
-            });
+            builder.Services.AddHttpContextAccessor();
+
+            //builder.Services.AddSingleton(new ClientCredentialsTokenRequest
+            //{
+            //    Address = "https://localhost:5005/connect/token",
+            //    ClientId = "movieClient",
+            //    ClientSecret = "secret",
+            //    Scope = "movieAPI"
+            //});
 
             var app = builder.Build();
 

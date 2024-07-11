@@ -1,5 +1,6 @@
 using IdentityServer4.Models;
 using IdentityServer4.Test;
+using IdentityServerHost.Quickstart.UI;
 
 namespace IdentityServer
 {
@@ -15,7 +16,7 @@ namespace IdentityServer
                 .AddInMemoryClients(IdentityServerConfiguration.Clients)
                 .AddInMemoryApiScopes(IdentityServerConfiguration.ApiScopes)
                 .AddInMemoryIdentityResources(IdentityServerConfiguration.IdentityResources)
-                .AddTestUsers(IdentityServerConfiguration.TestUsers)
+                .AddTestUsers(TestUsers.Users)
                 .AddDeveloperSigningCredential();
 
             var app = builder.Build();
