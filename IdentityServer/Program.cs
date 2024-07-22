@@ -12,6 +12,7 @@ namespace IdentityServer
 
             builder.Services.AddControllersWithViews();
 
+            // this is project use identityserver4 in memory, in actual, we must be use database
             builder.Services.AddIdentityServer()
                 .AddInMemoryClients(IdentityServerConfiguration.Clients)
                 .AddInMemoryApiScopes(IdentityServerConfiguration.ApiScopes)

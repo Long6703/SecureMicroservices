@@ -7,6 +7,7 @@ using Client.HttpHandler;
 using Microsoft.Net.Http.Headers;
 using IdentityModel.Client;
 using IdentityModel;
+using Microsoft.AspNetCore.Authentication;
 namespace Client
 {
     public class Program
@@ -37,6 +38,8 @@ namespace Client
                 options.Scope.Add("email");
                 options.Scope.Add("movieAPI");
                 options.Scope.Add("roles");
+
+                options.ClaimActions.MapUniqueJsonKey("role", "role");
 
                 options.SaveTokens = true;
                 options.GetClaimsFromUserInfoEndpoint = true;
